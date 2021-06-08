@@ -26,9 +26,8 @@ export class Html5QrcodeShim implements QrcodeDecoder {
     private zxingDecorderDelegate: QrcodeDecoder;
 
     public constructor(
-        requestedFormats: Array<Html5QrcodeSupportedFormats>,
-        verbose: boolean) {
-        this.zxingDecorderDelegate = new ZXingHtml5QrcodeDecoder(requestedFormats, verbose);
+        requestedFormats: Array<Html5QrcodeSupportedFormats>) {
+        this.zxingDecorderDelegate = new ZXingHtml5QrcodeDecoder(requestedFormats);
     }
 
     decode(canvas: HTMLCanvasElement): QrcodeResult {

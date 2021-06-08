@@ -218,7 +218,7 @@ export class Html5Qrcode {
             Html5QrcodeSupportedFormats.UPC_E,
             Html5QrcodeSupportedFormats.UPC_EAN_EXTENSION,
         ];
-        this.qrcode = new Html5QrcodeShim(requestedFormats, this.verbose);
+        this.qrcode = new Html5QrcodeShim(requestedFormats);
 
         this.foreverScanTimeout;
         this.localMediaStream;

@@ -68,17 +68,13 @@ export class ZXingHtml5QrcodeDecoder implements QrcodeDecoder {
     private zxingDecoder: any;
 
     public constructor(
-        requestedFormats: Array<Html5QrcodeSupportedFormats>,
-        verbose: boolean) {
-        if (!ZXing) {
-            throw 'Use html5qrcode.min.js without edit, ZXing not found.';
-        }
+        requestedFormats: Array<Html5QrcodeSupportedFormats>) {
 
         const hints = new Map();
         const formats = this.createZXingFormats(requestedFormats);
         hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
 
-        this.zxingDecoder = new MultiFormatReader(verbose);
+        this.zxingDecoder = new MultiFormatReader();
         this.zxingDecoder.setHints(hints);
     }
 

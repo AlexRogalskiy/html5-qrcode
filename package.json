@@ -1,11 +1,12 @@
 {
   "name": "@losant/html5-qrcode",
-  "version": "2.0.7",
+  "version": "2.1.10",
   "description": "HTML5 QR Code & bar code scanner, forked from https://github.com/mebjas/html5-qrcode",
-  "main": "src/index.ts",
+  "main": "src/index.js",
   "scripts": {
+    "prepublishOnly": "npm run-script build",
     "build-windows": "scripts\\build-windows.sh",
-    "build": "./scripts/build-default.sh",
+    "build": "tsc",
     "test": "./scripts/test.sh"
   },
   "repository": {
@@ -40,13 +41,13 @@
     "rewire": "^5.0.0",
     "ts-loader": "^9.1.2",
     "webpack": "^5.37.0",
-    "webpack-cli": "^4.7.0"
+    "webpack-cli": "^4.7.0",
+    "typescript": "^4.3.2"
   },
   "files": [
-    "dist/*"
+    "src/*"
   ],
   "dependencies": {
-    "@zxing/library": "^0.18.6",
-    "typescript": "^4.3.2"
+    "@zxing/library": "^0.18.6"
   }
 }
