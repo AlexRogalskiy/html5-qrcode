@@ -3,7 +3,7 @@
         "target": "es5",
         "module": "ES2015",
         "sourceMap": true,
-        "moduleResolution": "classic",
+        "moduleResolution": "node",
         "lib": [
             "es7",
             "dom"

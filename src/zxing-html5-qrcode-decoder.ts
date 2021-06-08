@@ -16,6 +16,16 @@ import {
     QrcodeDecoder
 } from "./core";
 
+import { 
+  MultiFormatReader, 
+  BarcodeFormat, 
+  DecodeHintType, 
+  HTMLCanvasElementLuminanceSource, 
+  BinaryBitmap, 
+  HybridBinarizer
+} from '@zxing/library';
+
+
 // Ambient tag to refer to ZXing library.
 declare const ZXing: any;
 
@@ -26,33 +36,33 @@ export class ZXingHtml5QrcodeDecoder implements QrcodeDecoder {
 
     private static formatMap: Map<Html5QrcodeSupportedFormats, any>
         = new Map([
-            [Html5QrcodeSupportedFormats.QR_CODE, ZXing.BarcodeFormat.QR_CODE ],
-            [Html5QrcodeSupportedFormats.AZTEC, ZXing.BarcodeFormat.AZTEC ],
-            [Html5QrcodeSupportedFormats.CODABAR, ZXing.BarcodeFormat.CODABAR ],
-            [Html5QrcodeSupportedFormats.CODE_39, ZXing.BarcodeFormat.CODE_39 ],
-            [Html5QrcodeSupportedFormats.CODE_93, ZXing.BarcodeFormat.CODE_93 ],
+            [Html5QrcodeSupportedFormats.QR_CODE, BarcodeFormat.QR_CODE ],
+            [Html5QrcodeSupportedFormats.AZTEC, BarcodeFormat.AZTEC ],
+            [Html5QrcodeSupportedFormats.CODABAR, BarcodeFormat.CODABAR ],
+            [Html5QrcodeSupportedFormats.CODE_39, BarcodeFormat.CODE_39 ],
+            [Html5QrcodeSupportedFormats.CODE_93, BarcodeFormat.CODE_93 ],
             [
                 Html5QrcodeSupportedFormats.CODE_128,
-                ZXing.BarcodeFormat.CODE_128 ],
+                BarcodeFormat.CODE_128 ],
             [
                 Html5QrcodeSupportedFormats.DATA_MATRIX,
-                ZXing.BarcodeFormat.DATA_MATRIX ],
+                BarcodeFormat.DATA_MATRIX ],
             [
                 Html5QrcodeSupportedFormats.MAXICODE,
-                ZXing.BarcodeFormat.MAXICODE ],
-            [Html5QrcodeSupportedFormats.ITF, ZXing.BarcodeFormat.ITF ],
-            [Html5QrcodeSupportedFormats.EAN_13, ZXing.BarcodeFormat.EAN_13 ],
-            [Html5QrcodeSupportedFormats.EAN_8, ZXing.BarcodeFormat.EAN_8 ],
-            [Html5QrcodeSupportedFormats.PDF_417, ZXing.BarcodeFormat.PDF_417 ],
-            [Html5QrcodeSupportedFormats.RSS_14, ZXing.BarcodeFormat.RSS_14 ],
+                BarcodeFormat.MAXICODE ],
+            [Html5QrcodeSupportedFormats.ITF, BarcodeFormat.ITF ],
+            [Html5QrcodeSupportedFormats.EAN_13, BarcodeFormat.EAN_13 ],
+            [Html5QrcodeSupportedFormats.EAN_8, BarcodeFormat.EAN_8 ],
+            [Html5QrcodeSupportedFormats.PDF_417, BarcodeFormat.PDF_417 ],
+            [Html5QrcodeSupportedFormats.RSS_14, BarcodeFormat.RSS_14 ],
             [
                 Html5QrcodeSupportedFormats.RSS_EXPANDED,
-                ZXing.BarcodeFormat.RSS_EXPANDED ],
-            [Html5QrcodeSupportedFormats.UPC_A, ZXing.BarcodeFormat.UPC_A ],
-            [Html5QrcodeSupportedFormats.UPC_E, ZXing.BarcodeFormat.UPC_E ],
+                BarcodeFormat.RSS_EXPANDED ],
+            [Html5QrcodeSupportedFormats.UPC_A, BarcodeFormat.UPC_A ],
+            [Html5QrcodeSupportedFormats.UPC_E, BarcodeFormat.UPC_E ],
             [
                 Html5QrcodeSupportedFormats.UPC_EAN_EXTENSION,
-                ZXing.BarcodeFormat.UPC_EAN_EXTENSION ]
+                BarcodeFormat.UPC_EAN_EXTENSION ]
         ]);
 
     private zxingDecoder: any;
@@ -66,18 +76,18 @@ export class ZXingHtml5QrcodeDecoder implements QrcodeDecoder {
 
         const hints = new Map();
         const formats = this.createZXingFormats(requestedFormats);
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
 
-        this.zxingDecoder = new ZXing.MultiFormatReader(verbose);
+        this.zxingDecoder = new MultiFormatReader(verbose);
         this.zxingDecoder.setHints(hints);
     }
 
     decode(canvas: HTMLCanvasElement): QrcodeResult {
         const luminanceSource
-            = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+            = new HTMLCanvasElementLuminanceSource(canvas);
         const binaryBitmap
-            = new ZXing.BinaryBitmap(
-                new ZXing.HybridBinarizer(luminanceSource));
+            = new BinaryBitmap(
+                new HybridBinarizer(luminanceSource));
         let result = this.zxingDecoder.decode(binaryBitmap);
         return {
             text: result.text
