@@ -1,22 +1,6 @@
 export var Html5QrcodeSupportedFormats;
 (function (Html5QrcodeSupportedFormats) {
     Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["QR_CODE"] = 0] = "QR_CODE";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["AZTEC"] = 1] = "AZTEC";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["CODABAR"] = 2] = "CODABAR";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["CODE_39"] = 3] = "CODE_39";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["CODE_93"] = 4] = "CODE_93";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["CODE_128"] = 5] = "CODE_128";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["DATA_MATRIX"] = 6] = "DATA_MATRIX";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["MAXICODE"] = 7] = "MAXICODE";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["ITF"] = 8] = "ITF";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["EAN_13"] = 9] = "EAN_13";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["EAN_8"] = 10] = "EAN_8";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["PDF_417"] = 11] = "PDF_417";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["RSS_14"] = 12] = "RSS_14";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["RSS_EXPANDED"] = 13] = "RSS_EXPANDED";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["UPC_A"] = 14] = "UPC_A";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["UPC_E"] = 15] = "UPC_E";
-    Html5QrcodeSupportedFormats[Html5QrcodeSupportedFormats["UPC_EAN_EXTENSION"] = 16] = "UPC_EAN_EXTENSION";
 })(Html5QrcodeSupportedFormats || (Html5QrcodeSupportedFormats = {}));
 export var Html5QrcodeScanType;
 (function (Html5QrcodeScanType) {

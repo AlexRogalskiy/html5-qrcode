@@ -5,6 +5,7 @@ var ZXingHtml5QrcodeDecoder = (function () {
         var hints = new Map();
         var formats = this.createZXingFormats(requestedFormats);
         hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+        hints.set(DecodeHintType.TRY_HARDER, true);
         this.zxingDecoder = new MultiFormatReader();
         this.zxingDecoder.setHints(hints);
     }

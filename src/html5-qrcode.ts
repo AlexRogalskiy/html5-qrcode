@@ -180,6 +180,9 @@ export class Html5Qrcode {
     private localMediaStream?: MediaStream;
     private qrRegion?: QrcodeRegionBounds;
     private context?: CanvasRenderingContext2D;
+    private captureContext?: CanvasRenderingContext2D;
+    private captureCanvas?: HTMLCanvasElement;
+
     private lastScanImageFile?: string;
     //#endregion
 
@@ -787,10 +790,15 @@ export class Html5Qrcode {
      */
     private scanContext(
          qrCodeSuccessCallback: QrcodeSuccessCallback,
-         qrCodeErrorCallback: QrcodeErrorCallback
+         qrCodeErrorCallback: QrcodeErrorCallback,
+         canvas: HTMLCanvasElement | undefined
      ): boolean {
+        const canvasToScan = canvas ? canvas : this.canvasElement;
+        if (!canvasToScan){
+          return false;
+        }
         try {
-            let result = this.qrcode.decode(this.canvasElement!);
+            let result = this.qrcode.decode(canvasToScan);
             qrCodeSuccessCallback(
                 result.text, Html5QrcodeResultFactory.createFrom(result.text));
             this.possiblyUpdateShaders(/* qrMatch= */ true);
@@ -802,6 +810,36 @@ export class Html5Qrcode {
                 errorMessage, Html5QrcodeErrorFactory.createFrom(errorMessage));
             return false;
         }
+    }
+
+    private getCaptureContext(videoElement : HTMLVideoElement) : CanvasRenderingContext2D{
+      if (!this.captureContext) {
+
+        if (!this.qrRegion) {
+            throw "qrRegion undefined when localMediaStream is ready.";
+        }
+
+        var widthRatio = videoElement.videoWidth / videoElement.clientWidth;
+        var heightRatio = videoElement.videoHeight / videoElement.clientHeight;
+        var scaledQrRegion = {
+          width: this.qrRegion.width * widthRatio,
+          height: this.qrRegion.height * heightRatio,
+          x: this.qrRegion.x * widthRatio,
+          y: this.qrRegion.y * heightRatio
+        }
+
+        var canvasElement = this.createCanvasElement(scaledQrRegion.width, scaledQrRegion.height, 'capture-canvas');
+        var context = canvasElement.getContext('2d');
+        if(!context){
+          throw "Could not create scanning context";
+        }
+        context.canvas.width = scaledQrRegion.width;
+        context.canvas.height = scaledQrRegion.height;
+        this.captureContext = context
+        this.captureCanvas = canvasElement
+      }
+  
+      return this.captureContext;
     }
 
     /**
@@ -819,6 +857,13 @@ export class Html5Qrcode {
             // There is difference in size of rendered video and one that is
             // considered by the canvas. Need to account for scaling factor.
             const videoElement = this.videoElement!;
+
+            const captureContext = this.getCaptureContext(videoElement);
+
+            if (!this.captureContext){
+              throw "Could not extract image onto capturing canvas";
+            }
+
             const widthRatio
                 = videoElement.videoWidth / videoElement.clientWidth;
             const heightRatio
@@ -832,32 +877,16 @@ export class Html5Qrcode {
             const sxOffset = this.qrRegion.x * widthRatio;
             const syOffset = this.qrRegion.y * heightRatio;
 
-            // Only decode the relevant area, ignore the shaded area,
-            // More reference:
-            // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-            this.context!.drawImage(
-                videoElement,
-                /* sx= */ sxOffset,
-                /* sy= */ syOffset,
-                /* sWidth= */ sWidthOffset,
-                /* sHeight= */ sHeightOffset,
-                /* dx= */ 0,
-                /* dy= */  0,
-                /* dWidth= */ this.qrRegion.width,
-                /* dHeight= */ this.qrRegion.height);
+             // extract QR box area from video, draw it on to canvas (that is also sized to full res QR box region)
+            captureContext.drawImage(videoElement, sxOffset, syOffset, sWidthOffset, sHeightOffset, 0, 0, sWidthOffset, sHeightOffset);
 
-                // Try scanning normal frame and in case of failure, scan
-                // the inverted context if not explictly disabled.
-                // TODO(mebjas): Move this logic to decoding library.
-                if (!this.scanContext(
-                    qrCodeSuccessCallback, qrCodeErrorCallback)
-                    && internalConfig.disableFlip !== true) {
-                    // scan inverted context.
-                    this.context!.translate(this.context!.canvas.width, 0);
-                    this.context!.scale(-1, 1);
-                    this.scanContext(
-                        qrCodeSuccessCallback, qrCodeErrorCallback);
-                }
+            // send invisible canvas to ZXing
+            if (!this.scanContext(qrCodeSuccessCallback, qrCodeErrorCallback, this.captureCanvas)
+                && internalConfig.disableFlip !== true) {
+                this.captureContext.translate(this.captureContext.canvas.width, 0);
+                this.captureContext.scale(-1, 1);
+                this.scanContext(qrCodeSuccessCallback, qrCodeErrorCallback, this.captureCanvas);
+            }
         }
         this.foreverScanTimeout = setTimeout(() => {
             this.foreverScan(
