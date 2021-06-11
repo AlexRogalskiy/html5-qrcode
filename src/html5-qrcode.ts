@@ -614,6 +614,27 @@ export class Html5Qrcode {
     }
 
     /**
+     * Returns the settings of the running video track.
+     *
+     * @beta This is an experimental API
+     * @returns the capabilities of a running video track.
+     * @throws error if the scanning is not in running state.
+     */
+    public getRunningTrackSettings() {
+        if (this.localMediaStream == null) {
+            throw "Scanning is not in running state, call this API only when"
+                + " QR code scanning using camera is in running state.";
+        }
+
+        if (this.localMediaStream.getVideoTracks().length == 0) {
+            throw "No video tracks found";
+        }
+
+        const videoTrack = this.localMediaStream.getVideoTracks()[0];
+        return videoTrack.getSettings();
+      }
+
+    /**
      * Apply a video constraints on running video track from camera.
      *
      * Important:

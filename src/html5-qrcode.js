@@ -424,9 +424,13 @@ var Html5Qrcode = (function () {
         this.context = context;
         this.canvasElement = canvasElement;
     };
-    Html5Qrcode.prototype.scanContext = function (qrCodeSuccessCallback, qrCodeErrorCallback) {
+    Html5Qrcode.prototype.scanContext = function (qrCodeSuccessCallback, qrCodeErrorCallback, canvas) {
+        var canvasToScan = canvas ? canvas : this.canvasElement;
+        if (!canvasToScan) {
+            return false;
+        }
         try {
-            var result = this.qrcode.decode(this.canvasElement);
+            var result = this.qrcode.decode(canvasToScan);
             qrCodeSuccessCallback(result.text, Html5QrcodeResultFactory.createFrom(result.text));
             this.possiblyUpdateShaders(true);
             return true;
@@ -438,6 +442,31 @@ var Html5Qrcode = (function () {
             return false;
         }
     };
+    Html5Qrcode.prototype.getCaptureContext = function (videoElement) {
+        if (!this.captureContext) {
+            if (!this.qrRegion) {
+                throw "qrRegion undefined when localMediaStream is ready.";
+            }
+            var widthRatio = videoElement.videoWidth / videoElement.clientWidth;
+            var heightRatio = videoElement.videoHeight / videoElement.clientHeight;
+            var scaledQrRegion = {
+                width: this.qrRegion.width * widthRatio,
+                height: this.qrRegion.height * heightRatio,
+                x: this.qrRegion.x * widthRatio,
+                y: this.qrRegion.y * heightRatio
+            };
+            var canvasElement = this.createCanvasElement(scaledQrRegion.width, scaledQrRegion.height, 'capture-canvas');
+            var context = canvasElement.getContext('2d');
+            if (!context) {
+                throw "Could not create scanning context";
+            }
+            context.canvas.width = scaledQrRegion.width;
+            context.canvas.height = scaledQrRegion.height;
+            this.captureContext = context;
+            this.captureCanvas = canvasElement;
+        }
+        return this.captureContext;
+    };
     Html5Qrcode.prototype.foreverScan = function (internalConfig, qrCodeSuccessCallback, qrCodeErrorCallback) {
         var _this = this;
         if (!this.shouldScan) {
@@ -445,6 +474,10 @@ var Html5Qrcode = (function () {
         }
         if (this.localMediaStream) {
             var videoElement = this.videoElement;
+            var captureContext = this.getCaptureContext(videoElement);
+            if (!this.captureContext) {
+                throw "Could not extract image onto capturing canvas";
+            }
             var widthRatio = videoElement.videoWidth / videoElement.clientWidth;
             var heightRatio = videoElement.videoHeight / videoElement.clientHeight;
             if (!this.qrRegion) {
@@ -454,12 +487,12 @@ var Html5Qrcode = (function () {
             var sHeightOffset = this.qrRegion.height * heightRatio;
             var sxOffset = this.qrRegion.x * widthRatio;
             var syOffset = this.qrRegion.y * heightRatio;
-            this.context.drawImage(videoElement, sxOffset, syOffset, sWidthOffset, sHeightOffset, 0, 0, this.qrRegion.width, this.qrRegion.height);
-            if (!this.scanContext(qrCodeSuccessCallback, qrCodeErrorCallback)
+            captureContext.drawImage(videoElement, sxOffset, syOffset, sWidthOffset, sHeightOffset, 0, 0, sWidthOffset, sHeightOffset);
+            if (!this.scanContext(qrCodeSuccessCallback, qrCodeErrorCallback, this.captureCanvas)
                 && internalConfig.disableFlip !== true) {
-                this.context.translate(this.context.canvas.width, 0);
-                this.context.scale(-1, 1);
-                this.scanContext(qrCodeSuccessCallback, qrCodeErrorCallback);
+                this.captureContext.translate(this.captureContext.canvas.width, 0);
+                this.captureContext.scale(-1, 1);
+                this.scanContext(qrCodeSuccessCallback, qrCodeErrorCallback, this.captureCanvas);
             }
         }
         this.foreverScanTimeout = setTimeout(function () {
